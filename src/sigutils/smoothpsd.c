@@ -101,6 +101,7 @@ SU_METHOD(su_smoothpsd, SUBOOL, feed, const SUCOMPLEX *data, SUSCOUNT size)
   unsigned int i;
   SUBOOL mutex_acquired = SU_FALSE;
   SUBOOL ok = SU_FALSE;
+  struct timeval stime, etime;
 
   SU_TRYZ(pthread_mutex_lock(&self->mutex));
 
@@ -129,6 +130,7 @@ SU_METHOD(su_smoothpsd, SUBOOL, feed, const SUCOMPLEX *data, SUSCOUNT size)
         if (self->fft_p >= self->max_p) {
           self->fft_p = 0;
           self->p = 0;
+          gettimeofday(&stime, NULL);
 
           /* Apply window function */
 #ifdef SU_USE_VOLK
@@ -140,6 +142,8 @@ SU_METHOD(su_smoothpsd, SUBOOL, feed, const SUCOMPLEX *data, SUSCOUNT size)
 #endif
 
           SU_TRY(su_smoothpsd_exec_fft(self));
+          gettimeofday(&etime, NULL);
+          printf("ftt took %ld us\n", (etime.tv_sec - stime.tv_sec)*1000000 + etime.tv_usec - stime.tv_usec);
         }
       }
 
@@ -173,6 +177,7 @@ SU_METHOD(su_smoothpsd, SUBOOL, feed, const SUCOMPLEX *data, SUSCOUNT size)
         if (self->fft_p >= self->max_p) {
           unsigned int copy_cnt = self->params.fft_size - self->p;
           self->fft_p = 0;
+          gettimeofday(&stime, NULL);
 
           /* put ring buffer time domain IQ data in sequential order */
           memcpy(self->fft, self->buffer + self->p, copy_cnt * sizeof(SUCOMPLEX));
@@ -188,6 +193,8 @@ SU_METHOD(su_smoothpsd, SUBOOL, feed, const SUCOMPLEX *data, SUSCOUNT size)
 #endif
 
           SU_TRY(su_smoothpsd_exec_fft(self));
+          gettimeofday(&etime, NULL);
+          printf("ftt took %ld us\n", (etime.tv_sec - stime.tv_sec)*1000000 + etime.tv_usec - stime.tv_usec);
         }
       }
     }
