@@ -87,6 +87,8 @@ su_lib_set_wisdom_enabled(SUBOOL enabled)
   }
 
   g_su_measure_ffts = enabled;
+
+  return SU_TRUE;
 }
 
 SUBOOL
